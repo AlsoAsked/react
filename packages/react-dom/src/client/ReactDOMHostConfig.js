@@ -515,7 +515,11 @@ export function insertBefore(
   child: Instance | TextInstance,
   beforeChild: Instance | TextInstance | SuspenseInstance,
 ): void {
-  parentInstance.insertBefore(child, beforeChild);
+  if (parentInstance.contains(beforeChild)) {
+    parentInstance.insertBefore(child, beforeChild);
+  } else if (beforeChild.parentNode) {
+    beforeChild.parentNode.insertBefore(child, beforeChild);
+  }
 }
 
 export function insertInContainerBefore(
@@ -524,9 +528,13 @@ export function insertInContainerBefore(
   beforeChild: Instance | TextInstance | SuspenseInstance,
 ): void {
   if (container.nodeType === COMMENT_NODE) {
-    (container.parentNode: any).insertBefore(child, beforeChild);
+    if ((container.parentNode: any).contains(beforeChild)) {
+      (container.parentNode: any).insertBefore(child, beforeChild);
+    } else if (beforeChild.parentNode) {
+      insertInContainerBefore(beforeChild.parentNode, child, beforeChild);
+    }
   } else {
-    container.insertBefore(child, beforeChild);
+    insertBefore(container, child, beforeChild);
   }
 }
 
@@ -566,7 +574,13 @@ export function removeChild(
   parentInstance: Instance,
   child: Instance | TextInstance | SuspenseInstance,
 ): void {
-  parentInstance.removeChild(child);
+  if (parentInstance.contains(child)) {
+    parentInstance.removeChild(child);
+  } else if (child.parentNode) {
+    child.parentNode.removeChild(child);
+  } else {
+    console.warn('removeChild() called on orphaned node', child);
+  }
 }
 
 export function removeChildFromContainer(
@@ -574,9 +588,15 @@ export function removeChildFromContainer(
   child: Instance | TextInstance | SuspenseInstance,
 ): void {
   if (container.nodeType === COMMENT_NODE) {
-    (container.parentNode: any).removeChild(child);
+    if ((container.parentNode: any).contains(child)) {
+      (container.parentNode: any).removeChild(child);
+    } else if (child.parentNode) {
+      removeChildFromContainer(child.parentNode, child);
+    } else {
+      console.warn('removeChildFromContainer() called on orphaned node', child);
+    }
   } else {
-    container.removeChild(child);
+    removeChild(container, child);
   }
 }
 
