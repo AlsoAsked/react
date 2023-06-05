@@ -519,6 +519,8 @@ export function insertBefore(
     parentInstance.insertBefore(child, beforeChild);
   } else if (beforeChild.parentNode) {
     beforeChild.parentNode.insertBefore(child, beforeChild);
+  } else {
+    console.warn('insertBefore() called with orphaned node', parentInstance, child, beforeChild);
   }
 }
 
@@ -532,6 +534,8 @@ export function insertInContainerBefore(
       (container.parentNode: any).insertBefore(child, beforeChild);
     } else if (beforeChild.parentNode) {
       insertInContainerBefore(beforeChild.parentNode, child, beforeChild);
+    } else {
+      console.warn('insertInContainerBefore() called with orphaned node', container, child, beforeChild);
     }
   } else {
     insertBefore(container, child, beforeChild);
@@ -579,7 +583,7 @@ export function removeChild(
   } else if (child.parentNode) {
     child.parentNode.removeChild(child);
   } else {
-    console.warn('removeChild() called on orphaned node', child);
+    console.warn('removeChild() called on orphaned node', parentInstance, child);
   }
 }
 
@@ -593,7 +597,7 @@ export function removeChildFromContainer(
     } else if (child.parentNode) {
       removeChildFromContainer(child.parentNode, child);
     } else {
-      console.warn('removeChildFromContainer() called on orphaned node', child);
+      console.warn('removeChildFromContainer() called on orphaned node', container, child);
     }
   } else {
     removeChild(container, child);
